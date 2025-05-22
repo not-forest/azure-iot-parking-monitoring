@@ -1,5 +1,8 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved. */
 /* SPDX-License-Identifier: MIT */
+/* 
+ *  This is only a main entry point that ensures a stable connection for communicating with Azure Cloud.
+ * */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,6 +72,8 @@ static esp_ip4_addr_t s_ip_addr;
 static bool s_is_connected_to_internet = false;
 /*-----------------------------------------------------------*/
 
+extern void vStartDemoTask( void );
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -84,15 +89,15 @@ static bool is_our_netif(
 }
 /*-----------------------------------------------------------*/
 
-static void on_got_ip( void * arg,
-                       esp_event_base_t event_base,
-                       int32_t event_id,
-                       void * event_data )
-{
+static void on_got_ip( 
+    void * arg,
+    esp_event_base_t event_base,
+    int32_t event_id,
+    void * event_data 
+) {
     ip_event_got_ip_t * event = ( ip_event_got_ip_t * ) event_data;
 
-    if( !is_our_netif( TAG, event->esp_netif ) )
-    {
+    if( !is_our_netif( TAG, event->esp_netif ) ) {
         ESP_LOGW( TAG, "Got IPv4 from another interface \"%s\": ignored",
                   esp_netif_get_desc( event->esp_netif ) );
         return;
@@ -106,17 +111,17 @@ static void on_got_ip( void * arg,
 }
 /*-----------------------------------------------------------*/
 
-static void on_wifi_disconnect( void * arg,
-                                esp_event_base_t event_base,
-                                int32_t event_id,
-                                void * event_data )
-{
+static void on_wifi_disconnect( 
+    void * arg,
+    esp_event_base_t event_base,
+    int32_t event_id,
+    void * event_data 
+) {
     ESP_LOGI( TAG, "Wi-Fi disconnected, trying to reconnect..." );
     s_is_connected_to_internet = false;
     esp_err_t err = esp_wifi_connect();
 
-    if( err == ESP_ERR_WIFI_NOT_STARTED )
-    {
+    if( err == ESP_ERR_WIFI_NOT_STARTED ) {
         return;
     }
 
@@ -124,17 +129,14 @@ static void on_wifi_disconnect( void * arg,
 }
 /*-----------------------------------------------------------*/
 
-static esp_netif_t * get_example_netif_from_desc( const char * desc )
-{
+static esp_netif_t * get_example_netif_from_desc( const char * desc ) {
     esp_netif_t * netif = NULL;
     char * expected_desc;
 
     asprintf( &expected_desc, "%s: %s", TAG, desc );
 
-    while( ( netif = esp_netif_next( netif ) ) != NULL )
-    {
-        if( strcmp( esp_netif_get_desc( netif ), expected_desc ) == 0 )
-        {
+    while( ( netif = esp_netif_next( netif ) ) != NULL ) {
+        if( strcmp( esp_netif_get_desc( netif ), expected_desc ) == 0 ) {
             free( expected_desc );
             return netif;
         }
@@ -145,8 +147,7 @@ static esp_netif_t * get_example_netif_from_desc( const char * desc )
 }
 /*-----------------------------------------------------------*/
 
-static esp_netif_t * wifi_start( void )
-{
+static esp_netif_t * wifi_start( void ) {
     char * desc;
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
@@ -174,8 +175,7 @@ static esp_netif_t * wifi_start( void )
     #endif
 
     ESP_ERROR_CHECK( esp_wifi_set_storage( WIFI_STORAGE_RAM ) );
-    wifi_config_t wifi_config =
-    {
+    wifi_config_t wifi_config = {
         .sta                    =
         {
             .ssid               = CONFIG_SAMPLE_IOT_WIFI_SSID,
@@ -195,8 +195,7 @@ static esp_netif_t * wifi_start( void )
 }
 /*-----------------------------------------------------------*/
 
-static void wifi_stop( void )
-{
+static void wifi_stop( void ) {
     s_is_connected_to_internet = false;
 
     esp_netif_t * wifi_netif = get_example_netif_from_desc( "sta" );
@@ -213,8 +212,7 @@ static void wifi_stop( void )
     #endif
     esp_err_t err = esp_wifi_stop();
 
-    if( err == ESP_ERR_WIFI_NOT_INIT )
-    {
+    if( err == ESP_ERR_WIFI_NOT_INIT ) {
         return;
     }
 
@@ -225,16 +223,13 @@ static void wifi_stop( void )
 }
 /*-----------------------------------------------------------*/
 
-static void stop( void )
-{
+static void stop( void ) {
     wifi_stop();
 }
 /*-----------------------------------------------------------*/
 
-static esp_err_t example_connect( void )
-{
-    if( s_semph_get_ip_addrs != NULL )
-    {
+static esp_err_t example_connect( void ) {
+    if( s_semph_get_ip_addrs != NULL ) {
         return ESP_ERR_INVALID_STATE;
     }
 
@@ -247,8 +242,7 @@ static esp_err_t example_connect( void )
     ESP_ERROR_CHECK( esp_register_shutdown_handler( &stop ) );
     ESP_LOGI( TAG, "Waiting for IP(s)" );
 
-    for( int i = 0; i < NR_OF_IP_ADDRESSES_TO_WAIT_FOR; ++i )
-    {
+    for( int i = 0; i < NR_OF_IP_ADDRESSES_TO_WAIT_FOR; ++i ) {
         xSemaphoreTake( s_semph_get_ip_addrs, portMAX_DELAY );
     }
 
@@ -256,12 +250,10 @@ static esp_err_t example_connect( void )
     esp_netif_t * netif = NULL;
     esp_netif_ip_info_t ip;
 
-    for( int i = 0; i < esp_netif_get_nr_of_ifs(); ++i )
-    {
+    for( int i = 0; i < esp_netif_get_nr_of_ifs(); ++i ) {
         netif = esp_netif_next( netif );
 
-        if( is_our_netif( TAG, netif ) )
-        {
+        if( is_our_netif( TAG, netif ) ) {
             ESP_LOGI( TAG, "Connected to %s", esp_netif_get_desc( netif ) );
             ESP_ERROR_CHECK( esp_netif_get_ip_info( netif, &ip ) );
 
@@ -272,22 +264,19 @@ static esp_err_t example_connect( void )
     return ESP_OK;
 }
 /*-----------------------------------------------------------*/
-bool xAzureSample_IsConnectedToInternet()
-{
+bool xAzureSample_IsConnectedToInternet() {
     return s_is_connected_to_internet;
 }
 
 /*-----------------------------------------------------------*/
 
-static void time_sync_notification_cb( struct timeval * tv )
-{
+static void time_sync_notification_cb( struct timeval * tv ) {
     ESP_LOGI( TAG, "Notification of a time synchronization event" );
     g_timeInitialized = true;
 }
 /*-----------------------------------------------------------*/
 
-static void initialize_time()
-{
+static void initialize_time() {
     sntp_setoperatingmode( SNTP_OPMODE_POLL );
     sntp_setservername( 0, SNTP_SERVER_FQDN );
     sntp_set_time_sync_notification_cb( time_sync_notification_cb );
@@ -295,15 +284,13 @@ static void initialize_time()
 
     ESP_LOGI( TAG, "Waiting for time synchronization with SNTP server" );
 
-    while( !g_timeInitialized )
-    {
+    while( !g_timeInitialized ) {
         vTaskDelay( pdMS_TO_TICKS( 1000 ) );
     }
 }
 /*-----------------------------------------------------------*/
 
-void app_main( void )
-{
+void app_main( void ) {
     ESP_ERROR_CHECK( nvs_flash_init() );
     ESP_ERROR_CHECK( esp_netif_init() );
     ESP_ERROR_CHECK( esp_event_loop_create_default() );
@@ -313,15 +300,15 @@ void app_main( void )
     ( void ) example_connect();
 
     initialize_time();
+
+    vStartDemoTask();
 }
 /*-----------------------------------------------------------*/
 
-uint64_t ullGetUnixTime( void )
-{
+uint64_t ullGetUnixTime( void ) {
     time_t now = time( NULL );
 
-    if( now == ( time_t ) ( -1 ) )
-    {
+    if( now == ( time_t ) ( -1 ) ) {
         ESP_LOGE( TAG, "Failed obtaining current time.\r\n" );
     }
 

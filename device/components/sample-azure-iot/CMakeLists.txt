@@ -5,15 +5,9 @@ set(ROOT_PATH
     ~/Documents/iot-middleware-freertos-samples/
 )
 
-if (DEFINED CONFIG_AZURE_SAMPLE_USE_PLUG_AND_PLAY AND CONFIG_AZURE_SAMPLE_USE_PLUG_AND_PLAY MATCHES "y")
-    file(GLOB_RECURSE COMPONENT_SOURCES
-        ${ROOT_PATH}/demos/sample_azure_iot_pnp/*.c
-    )
-else()
-    file(GLOB_RECURSE COMPONENT_SOURCES
-        ${ROOT_PATH}/demos/sample_azure_iot/*.c
-    )
-endif()
+file(GLOB_RECURSE COMPONENT_SOURCES
+    ${ROOT_PATH}/demos/sample_azure_iot/*.c
+)
 
 # kconfig does not support multiline strings.
 # For certificates, we use as a workaround escaping the newlines
