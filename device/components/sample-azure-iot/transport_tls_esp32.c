@@ -39,16 +39,16 @@
 /* TLS includes. */
 #include "esp_transport_ssl.h"
 
-#include "demo_config.h"
+#include "app_config.h"
 
 /* For using the ATECC608 secure element if support is configured */
-#ifdef democonfigUSE_HSM
+#ifdef appconfigUSE_HSM
     #include "cryptoauthlib.h"
 #endif
 
 static const char *TAG = "tls_freertos";
 
-#ifdef democonfigUSE_HSM
+#ifdef appconfigUSE_HSM
 
 #define tlsesp32SERIAL_NUMBER_SIZE 9
 #define tlsesp32REGISTRATION_ID_SIZE 21
@@ -214,7 +214,7 @@ uint32_t getRegistrationId( char **ppcRegistrationId ) {
         return 0;
     }
 
-#endif /* democonfigUSE_HSM */
+#endif /* appconfigUSE_HSM */
 
 
 /**
@@ -311,7 +311,7 @@ TlsTransportStatus_t TLS_Socket_Connect( NetworkContext_t * pNetworkContext,
             ESP_LOGI( TAG, "Setting CA store");
             esp_tls_set_global_ca_store( ( const unsigned char * ) pNetworkCredentials->pucRootCa, pNetworkCredentials->xRootCaSize );
         }
-#ifdef democonfigUSE_HSM
+#ifdef appconfigUSE_HSM
 
         esp_transport_ssl_use_secure_element( pxEspTlsTransport->xTransport );
 

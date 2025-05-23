@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 set(ROOT_PATH
-    ~/Documents/iot-middleware-freertos-samples/
+    $ENV{HOME}/Documents/iot-middleware-freertos-samples/
 )
 
 set(AZURE_IOT_MIDDLEWARE_FREERTOS
