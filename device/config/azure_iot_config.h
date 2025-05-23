@@ -37,3 +37,9 @@
 /************ End of logging configuration ****************/
 
 #endif /* AZURE_IOT_CONFIG_H */
+
+/**
+ * @brief Azure IoT task that utilizes middleware API to connect to Azure IoT Hub.
+ * The newest information is sent each minute.
+ */
+void prvAzureMainLoopTask( void * pvParameters );

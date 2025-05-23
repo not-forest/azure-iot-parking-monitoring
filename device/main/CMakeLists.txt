@@ -10,6 +10,7 @@ set(COMPONENT_INCLUDE_DIRS
 
 set(COMPONENT_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/azure_iot_main.c
+    ${CMAKE_CURRENT_LIST_DIR}/azure_iot_cloud.c
 )
 
 idf_component_register(

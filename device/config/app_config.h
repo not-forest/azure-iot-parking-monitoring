@@ -1,8 +1,8 @@
 /* Copyright (c) Microsoft Corporation.
  * Licensed under the MIT License. */
 
-#ifndef DEMO_CONFIG_H
-#define DEMO_CONFIG_H
+#ifndef APP_CONFIG_H
+#define APP_CONFIG_H
 
 #include <stdlib.h>
 
@@ -21,7 +21,7 @@
 #include "esp_log.h"
 
 #ifndef LIBRARY_LOG_NAME
-    #define LIBRARY_LOG_NAME    "AzureIoTDemo"
+    #define LIBRARY_LOG_NAME    "AzureIoTApp"
 #endif
 
 #define SINGLE_PARENTHESIS_LOGE( x, ... )    ESP_LOGE( LIBRARY_LOG_NAME, x, ## __VA_ARGS__ )
@@ -39,22 +39,14 @@
 /************ End of logging configuration ****************/
 
 /**
- * @brief The model id for this device.
- *        This plug-and-play model can be found at:
- *        https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/azureiot/devkit/freertos/esp32azureiotkit-1.json
- */
-#define sampleazureiotMODEL_ID    "dtmi:azureiot:devkit:freertos:Esp32AzureIotKit;1"
-
-
-/**
  * @brief Enable Device Provisioning
  */
 
 #ifdef CONFIG_ENABLE_DPS_SAMPLE
-    #define democonfigENABLE_DPS_SAMPLE
+    #define appconfigENABLE_DPS_SAMPLE
 #endif
 
-#ifdef democonfigENABLE_DPS_SAMPLE
+#ifdef appconfigENABLE_DPS_SAMPLE
 
 /**
  * @brief Provisioning service endpoint.
@@ -62,7 +54,7 @@
  * @note https://docs.microsoft.com/azure/iot-dps/concepts-service#service-operations-endpoint
  *
  */
-    #define democonfigENDPOINT           "global.azure-devices-provisioning.net"
+    #define appconfigENDPOINT           "global.azure-devices-provisioning.net"
 
 /**
  * @brief Id scope of provisioning service.
@@ -70,7 +62,7 @@
  * @note https://docs.microsoft.com/azure/iot-dps/concepts-service#id-scope
  *
  */
-    #define democonfigID_SCOPE           CONFIG_AZURE_DPS_ID_SCOPE
+    #define appconfigID_SCOPE           CONFIG_AZURE_DPS_ID_SCOPE
 
 /**
  * @brief Registration Id of provisioning service
@@ -79,36 +71,36 @@
  *
  *  @note https://docs.microsoft.com/azure/iot-dps/concepts-service#registration-id
  */
-    #define democonfigREGISTRATION_ID    CONFIG_AZURE_DPS_REGISTRATION_ID
+    #define appconfigREGISTRATION_ID    CONFIG_AZURE_DPS_REGISTRATION_ID
 
 
-#endif /* democonfigENABLE_DPS_SAMPLE */
+#endif /* appconfigENABLE_DPS_SAMPLE */
 
 /**
  * @brief IoTHub device Id.
  *
  */
-#define democonfigDEVICE_ID    CONFIG_AZURE_IOT_DEVICE_ID
+#define appconfigDEVICE_ID    CONFIG_AZURE_IOT_DEVICE_ID
 
 /**
  * @brief IoTHub module Id.
  *
  * @note This is optional argument for IoTHub
  */
-#define democonfigMODULE_ID    CONFIG_AZURE_IOT_MODULE_ID
+#define appconfigMODULE_ID    CONFIG_AZURE_IOT_MODULE_ID
 
 /**
  * @brief IoTHub hostname.
  *
  */
-#define democonfigHOSTNAME     CONFIG_AZURE_IOT_HUB_FQDN
+#define appconfigHOSTNAME     CONFIG_AZURE_IOT_HUB_FQDN
 
 /**
  * @brief Device symmetric key
  *
  */
 #ifdef CONFIG_AZURE_IOT_DEVICE_SYMMETRIC_KEY
-    #define democonfigDEVICE_SYMMETRIC_KEY    CONFIG_AZURE_IOT_DEVICE_SYMMETRIC_KEY
+    #define appconfigDEVICE_SYMMETRIC_KEY    CONFIG_AZURE_IOT_DEVICE_SYMMETRIC_KEY
 #endif
 
 /**
@@ -116,7 +108,7 @@
  *
  */
 #ifdef CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE
-    #define democonfigCLIENT_CERTIFICATE_PEM    CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE
+    #define appconfigCLIENT_CERTIFICATE_PEM    CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE
 #endif
 
 /**
@@ -124,7 +116,7 @@
  *
  */
 #ifdef CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE_PRIVATE_KEY
-    #define democonfigCLIENT_PRIVATE_KEY_PEM    CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE_PRIVATE_KEY
+    #define appconfigCLIENT_PRIVATE_KEY_PEM    CONFIG_AZURE_IOT_DEVICE_CLIENT_CERTIFICATE_PRIVATE_KEY
 #endif
 
 /**
@@ -138,7 +130,7 @@
  * https://github.com/Azure-Samples/iot-middleware-freertos-samples/blob/main/docs/certificate-notice.md
  *
  */
-#define democonfigROOT_CA_PEM                                              \
+#define appconfigROOT_CA_PEM                                              \
     "-----BEGIN CERTIFICATE-----\r\n"                                      \
     "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n" \
     "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n" \
@@ -220,21 +212,21 @@
  * @brief Set the stack size of the main demo task.
  *
  */
-#define democonfigDEMO_STACKSIZE         CONFIG_AZURE_TASK_STACKSIZE
+#define appconfigSTACKSIZE         CONFIG_AZURE_TASK_STACKSIZE
 
 /**
  * @brief Size of the network buffer for MQTT packets.
  */
-#define democonfigNETWORK_BUFFER_SIZE    CONFIG_NETWORK_BUFFER_SIZE
+#define appconfigNETWORK_BUFFER_SIZE    CONFIG_NETWORK_BUFFER_SIZE
 
 /**
  * @brief IoTHub endpoint port.
  */
-#define democonfigIOTHUB_PORT            8883
+#define appconfigIOTHUB_PORT            8883
 
 /**
  * @brief Defines configRAND32, used by the common sample modules.
  */
 #define configRAND32()    ( rand() / RAND_MAX )
 
-#endif /* DEMO_CONFIG_H */
+#endif /* APP_CONFIG_H */

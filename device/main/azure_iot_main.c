@@ -10,6 +10,8 @@
 #include <string.h>
 
 #include "azure_sample_connection.h"
+#include "azure_iot_config.h"
+#include "app_config.h"
 
 #include "sdkconfig.h"
 #include "esp_event.h"
@@ -70,10 +72,6 @@ static xSemaphoreHandle s_semph_get_ip_addrs;
 static esp_ip4_addr_t s_ip_addr;
 
 static bool s_is_connected_to_internet = false;
-/*-----------------------------------------------------------*/
-
-extern void vStartDemoTask( void );
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -300,18 +298,14 @@ void app_main( void ) {
     ( void ) example_connect();
 
     initialize_time();
-
-    vStartDemoTask();
+    
+    /* Spawning main Azure loop task. */
+    xTaskCreate( 
+        prvAzureMainLoopTask, 
+        "AzureMainLoop", 
+        appconfigSTACKSIZE, 
+        NULL, 
+        tskIDLE_PRIORITY, 
+        NULL 
+    );
 }
-/*-----------------------------------------------------------*/
-
-uint64_t ullGetUnixTime( void ) {
-    time_t now = time( NULL );
-
-    if( now == ( time_t ) ( -1 ) ) {
-        ESP_LOGE( TAG, "Failed obtaining current time.\r\n" );
-    }
-
-    return now;
-}
-/*-----------------------------------------------------------*/
