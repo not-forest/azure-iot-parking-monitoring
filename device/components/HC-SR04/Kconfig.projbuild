@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: MIT
+
+menu "HC-SR04 Pin Mapping Settings"
+
+    config TRIG_MAPPING
+        int "Mapping for \"Trig\" pin."
+        default 2
+        help
+            "Use to define which pin is physically connected to the \"Trig\" pin input."
+
+    config ECHO_MAPPING
+        int "Mapping for \"Echo\" pin."
+        default 4
+        help
+            "Use to define which pin is physically connected to the \"Echo\" pin input."
+
+endmenu
