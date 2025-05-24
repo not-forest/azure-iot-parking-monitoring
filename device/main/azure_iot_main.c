@@ -133,7 +133,7 @@ static esp_netif_t * get_example_netif_from_desc( const char * desc ) {
 
     asprintf( &expected_desc, "%s: %s", TAG, desc );
 
-    while( ( netif = esp_netif_next( netif ) ) != NULL ) {
+    while( ( netif = esp_netif_next_unsafe( netif ) ) != NULL ) {
         if( strcmp( esp_netif_get_desc( netif ), expected_desc ) == 0 ) {
             free( expected_desc );
             return netif;
@@ -249,7 +249,7 @@ static esp_err_t example_connect( void ) {
     esp_netif_ip_info_t ip;
 
     for( int i = 0; i < esp_netif_get_nr_of_ifs(); ++i ) {
-        netif = esp_netif_next( netif );
+        netif = esp_netif_next_unsafe( netif );
 
         if( is_our_netif( TAG, netif ) ) {
             ESP_LOGI( TAG, "Connected to %s", esp_netif_get_desc( netif ) );
@@ -275,10 +275,10 @@ static void time_sync_notification_cb( struct timeval * tv ) {
 /*-----------------------------------------------------------*/
 
 static void initialize_time() {
-    sntp_setoperatingmode( SNTP_OPMODE_POLL );
-    sntp_setservername( 0, SNTP_SERVER_FQDN );
+    esp_sntp_setoperatingmode( SNTP_OPMODE_POLL );
+    esp_sntp_setservername( 0, SNTP_SERVER_FQDN );
     sntp_set_time_sync_notification_cb( time_sync_notification_cb );
-    sntp_init();
+    esp_sntp_init();
 
     ESP_LOGI( TAG, "Waiting for time synchronization with SNTP server" );
 
