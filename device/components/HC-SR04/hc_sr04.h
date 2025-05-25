@@ -35,6 +35,13 @@ static gpio_config_t echo_pin_config = {
     .pin_bit_mask = (1ULL << sensorconfigDISTANCE_SENSOR_MAPPING_ECHO),
 };
 
+/*
+ *  @brief Periodic sensor handler which mutates the state of the parking lot according to 
+ *  obtained distance value. Adaptive thresholding is used in order to be compatible with
+ *  parking yards of different height.
+ * */
+void vSensorHandlingTask( void*_ );
+
 /* 
  *  @brief Initializes the HV-SR04 sensor based on the provided mapping.
  * */

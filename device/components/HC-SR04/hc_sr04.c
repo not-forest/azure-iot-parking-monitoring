@@ -3,6 +3,10 @@
  *  HC-SR04 Ultrasonic Sensor Module driver.
  * */
 
+#include "esp_intr_alloc.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/projdefs.h"
+#include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_rom_sys.h"
 #include "esp_attr.h"
@@ -11,7 +15,7 @@
 
 #include "hc_sr04.h"
 
-const char* TAG = "HC-SR04";
+static const char* TAG = "HC-SR04";
 
 volatile int64_t pstart = 0;
 volatile uint32_t d_raw = 0;
@@ -38,6 +42,9 @@ void vInitHCSR04( void ) {
 
     gpio_config(&echo_pin_config);
     gpio_config(&trig_pin_config);
+    gpio_set_intr_type(sensorconfigDISTANCE_SENSOR_MAPPING_ECHO, GPIO_INTR_ANYEDGE);
+    gpio_install_isr_service(ESP_INTR_FLAG_EDGE);
+
     gpio_isr_handler_add(sensorconfigDISTANCE_SENSOR_MAPPING_ECHO, hc_sr04_isr_handler, NULL);
 }
 
@@ -59,4 +66,19 @@ uint32_t ulGetDistanceCm( void ) {
     uint32_t dist = d_raw / 58; 
     ESP_LOGI(TAG, "Last measured sensor distance: %lu", dist);
     return dist;  // Approximate value according to sensor datasheet.
+}
+
+/*
+ *  @brief Periodic sensor handler which mutates the state of the parking lot according to 
+ *  obtained distance value. Adaptive thresholding is used in order to be compatible with
+ *  parking yards of different height.
+ * */
+void vSensorHandlingTask( void*_ ) {
+    ESP_LOGI(TAG, "Sensor handler task spawned.");
+    vInitHCSR04();
+
+    for(;;) {
+        vMeasureDistance();
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }

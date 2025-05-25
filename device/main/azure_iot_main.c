@@ -12,6 +12,7 @@
 #include "azure_sample_connection.h"
 #include "azure_iot_config.h"
 #include "app_config.h"
+#include "hc_sr04.h"
 
 #include "sdkconfig.h"
 #include "esp_event.h"
@@ -298,7 +299,17 @@ void app_main( void ) {
     ( void ) example_connect();
 
     initialize_time();
-    
+   
+    /* Main sensor handling function. */
+    xTaskCreate(
+        vSensorHandlingTask,
+        "SensorHandlerLoop",
+        2048,
+        NULL,
+        1,
+        NULL
+    );
+
     /* Spawning main Azure loop task. */
     xTaskCreate( 
         prvAzureMainLoopTask, 

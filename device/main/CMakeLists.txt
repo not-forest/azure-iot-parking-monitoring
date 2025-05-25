@@ -16,5 +16,5 @@ set(COMPONENT_SOURCES
 idf_component_register(
     SRCS ${COMPONENT_SOURCES}
     INCLUDE_DIRS ${COMPONENT_INCLUDE_DIRS}
-    REQUIRES esp_event esp_wifi freertos nvs_flash coreMQTT azure-sdk-for-c azure-iot-middleware-freertos sample-azure-iot
+    REQUIRES esp_event esp_wifi freertos nvs_flash coreMQTT azure-sdk-for-c azure-iot-middleware-freertos sample-azure-iot HC-SR04
 )

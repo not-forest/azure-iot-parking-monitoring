@@ -18,6 +18,7 @@
 #include "backoff_algorithm.h"
 #include "transport_tls_socket.h"
 #include "azure_sample_crypto.h"
+#include "hc_sr04.h"
 
 /* Compile time error for undefined configs. */
 
@@ -66,16 +67,11 @@
 #define CONNACK_RECV_TIMEOUT_MS                 ( 10000U )
 
 /**
- * @brief The Telemetry message published in this example.
- */
-#define MESSAGE                                 "Hello World : %d !"
-
-/**
  * @brief  The content type of the Telemetry message published in this example.
  * @remark Message properties must be url-encoded.
  *         This message property is not required to send telemetry.
  */
-#define MESSAGE_CONTENT_TYPE                    "text%2Fplain"
+#define MESSAGE_CONTENT_TYPE                    "application%2Fjson"
 
 /**
  * @brief  The content encoding of the Telemetry message published in this example.
@@ -85,14 +81,9 @@
 #define MESSAGE_CONTENT_ENCODING                "us-ascii"
 
 /**
- * @brief The reported property payload to send to IoT Hub
- */
-#define PROPERTY                                "{ \"PropertyIterationForCurrentConnection\": \"%d\" }"
-
-/**
  * @brief Time in ticks to wait between each cycle of the main loop.
  */
-#define DELAY_BETWEEN_ITERATIONS_TICKS     ( pdMS_TO_TICKS( 60000U ) )
+#define DELAY_BETWEEN_ITERATIONS_TICKS     ( pdMS_TO_TICKS( 10 * 1000U ) )
 
 /**
  * @brief Timeout for MQTT_ProcessLoop in milliseconds.
@@ -137,6 +128,13 @@ static AzureIoTHubClient_t xAzureIoTHubClient;
  * @brief Static buffer used to hold MQTT messages being sent and received.
  */
 static uint8_t ucMQTTMessageBuffer[ appconfigNETWORK_BUFFER_SIZE ];
+
+/* 
+ *  @brief Contains the current state of this IoT device.
+ * */
+static struct {
+    bool bParkingLotIsFree;
+} tAppState = { .bParkingLotIsFree = true };
 
 /*-----------------------------------------------------------*/
 
@@ -314,9 +312,7 @@ static uint32_t prvConnectToServerWithBackoffRetries( const char * pcHostName,
  * The newest information is sent each minute.
  */
 void prvAzureMainLoopTask( void * pvParameters ) {
-    int lPublishCount = 0;
     uint32_t ulScratchBufferLength = 0U;
-    const int lMaxPublishCount = 5;
     NetworkCredentials_t xNetworkCredentials = { 0 };
     AzureIoTTransportInterface_t xTransport;
     NetworkContext_t xNetworkContext = { 0 };
@@ -425,44 +421,35 @@ void prvAzureMainLoopTask( void * pvParameters ) {
                                                         ( uint8_t * ) AZ_IOT_MESSAGE_PROPERTIES_CONTENT_ENCODING, sizeof( AZ_IOT_MESSAGE_PROPERTIES_CONTENT_ENCODING ) - 1,
                                                         ( uint8_t * ) MESSAGE_CONTENT_ENCODING, sizeof( MESSAGE_CONTENT_ENCODING ) - 1 );
             configASSERT( xResult == eAzureIoTSuccess );
-
-            /* How to send an user-defined custom property. */
-            xResult = AzureIoTMessage_PropertiesAppend( &xPropertyBag, ( uint8_t * ) "name", sizeof( "name" ) - 1,
-                                                        ( uint8_t * ) "value", sizeof( "value" ) - 1 );
+            xResult = AzureIoTMessage_PropertiesAppend( 
+                &xPropertyBag, ( uint8_t * ) "status", sizeof( "status" ) - 1,
+                ( uint8_t * ) "online", sizeof( "online" ) - 1 );
             configASSERT( xResult == eAzureIoTSuccess );
 
-            /* Publish messages with QoS1, send and process Keep alive messages. */
-            for( lPublishCount = 0;
-                 lPublishCount < lMaxPublishCount && xAzureSample_IsConnectedToInternet();
-                 lPublishCount++ )
-            {
-                ulScratchBufferLength = snprintf( ( char * ) ucScratchBuffer, sizeof( ucScratchBuffer ),
-                                                  MESSAGE, lPublishCount );
-                xResult = AzureIoTHubClient_SendTelemetry( &xAzureIoTHubClient,
-                                                           ucScratchBuffer, ulScratchBufferLength,
-                                                           &xPropertyBag, eAzureIoTHubMessageQoS1, NULL );
-                configASSERT( xResult == eAzureIoTSuccess );
 
-                LogInfo( ( "Attempt to receive publish message from IoT Hub.\r\n" ) );
-                xResult = AzureIoTHubClient_ProcessLoop( &xAzureIoTHubClient,
-                                                         PROCESS_LOOP_TIMEOUT_MS );
-                configASSERT( xResult == eAzureIoTSuccess );
-
-                if( lPublishCount % 2 == 0 )
-                {
-                    /* Send reported property every other cycle */
-                    ulScratchBufferLength = snprintf( ( char * ) ucScratchBuffer, sizeof( ucScratchBuffer ),
-                                                      PROPERTY, lPublishCount / 2 + 1 );
-                    xResult = AzureIoTHubClient_SendPropertiesReported( &xAzureIoTHubClient,
-                                                                        ucScratchBuffer, ulScratchBufferLength,
-                                                                        NULL );
-                    configASSERT( xResult == eAzureIoTSuccess );
-                }
-
-                /* Leave Connection Idle for some time. */
-                LogInfo( ( "Keeping Connection Idle...\r\n\r\n" ) );
-                vTaskDelay( DELAY_BETWEEN_PUBLISHES_TICKS );
+            /* MQTT Publishing  */
+            if (tAppState.bParkingLotIsFree) {
+                ulScratchBufferLength = snprintf(
+                    (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
+                    "{ \"is_free\": true, \"vehicle_size\": \"%ld\" }", ulGetDistanceCm()
+                );
+            } else {
+                ulScratchBufferLength = snprintf(
+                    (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
+                    "{ \"is_free\": false }"
+                );
             }
+
+            xResult = AzureIoTHubClient_SendTelemetry(&xAzureIoTHubClient,
+                                         ucScratchBuffer, ulScratchBufferLength,
+                                         &xPropertyBag, eAzureIoTHubMessageQoS1, NULL);
+            configASSERT( xResult == eAzureIoTSuccess );
+
+            LogInfo( ( "Attempt to receive publish message from IoT Hub.\r\n" ) );
+            xResult = AzureIoTHubClient_ProcessLoop( &xAzureIoTHubClient,
+                                                         PROCESS_LOOP_TIMEOUT_MS );
+            configASSERT( xResult == eAzureIoTSuccess );
+            /* End MQTT Publishing.  */
 
             if( xAzureSample_IsConnectedToInternet() )
             {
@@ -485,13 +472,9 @@ void prvAzureMainLoopTask( void * pvParameters ) {
 
             /* Close the network connection.  */
             TLS_Socket_Disconnect( &xNetworkContext );
-
-            /* Wait for some time between two iterations to ensure that we do not
-             * bombard the IoT Hub. */
-            LogInfo( ( "app completed successfully.\r\n" ) );
         }
 
-        LogInfo( ( "Short delay before starting the next iteration.... \r\n\r\n" ) );
+        LogInfo( ( "Cloud communication iteration complete. \r\n\r\n") );
         vTaskDelay( DELAY_BETWEEN_ITERATIONS_TICKS );
     }
 }
