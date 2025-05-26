@@ -4,6 +4,7 @@
 #ifndef APP_CONFIG_H
 #define APP_CONFIG_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 /**************************************************/
@@ -37,6 +38,14 @@
 #define LogDebug( message )                  SINGLE_PARENTHESIS_LOGD message
 
 /************ End of logging configuration ****************/
+
+/* 
+ *  @brief Contains the current state of this IoT device.
+ * */
+typedef struct {
+    uint32_t ulCalibrationDistance;
+    bool bParkingLotIsFree;
+} tAppState;
 
 /**
  * @brief Enable Device Provisioning
@@ -75,6 +84,16 @@
 
 
 #endif /* appconfigENABLE_DPS_SAMPLE */
+
+/* 
+ *  @brief Error margin in cm. that is still considered as calibration value. 
+ * */
+#define appconfigCALIBRATION_ERROR_MARGIN CONFIG_CALIBRATION_ERROR_MARGIN
+
+/*
+ * @brief Amount of probes to perform during the sensor calibration.
+ */
+#define appconfigSENSOR_CALIBRATION_PROBES CONFIG_SENSOR_CALIBRATION_PROBES
 
 /**
  * @brief IoTHub device Id.

@@ -14,6 +14,7 @@
 #include "app_config.h"
 #include "hc_sr04.h"
 
+#include "projdefs.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
 #include "esp_wifi.h"
@@ -73,6 +74,9 @@ static xSemaphoreHandle s_semph_get_ip_addrs;
 static esp_ip4_addr_t s_ip_addr;
 
 static bool s_is_connected_to_internet = false;
+
+extern tAppState T_APPS;
+
 /*-----------------------------------------------------------*/
 
 /**
@@ -275,7 +279,10 @@ static void time_sync_notification_cb( struct timeval * tv ) {
 }
 /*-----------------------------------------------------------*/
 
-static void initialize_time() {
+/* 
+ *  @brief Initializes time constraint for application timings. 
+ * */
+static void initialize_time( void ) {
     esp_sntp_setoperatingmode( SNTP_OPMODE_POLL );
     esp_sntp_setservername( 0, SNTP_SERVER_FQDN );
     sntp_set_time_sync_notification_cb( time_sync_notification_cb );
@@ -289,6 +296,29 @@ static void initialize_time() {
 }
 /*-----------------------------------------------------------*/
 
+/* 
+ *  brief Initializes and calibrates the ultra sonic sensor during application startup. 
+ * */
+static void sensor_calibrate( void ) {
+    vInitHCSR04();
+    uint32_t acc = 0;
+
+    ESP_LOGI(TAG, "Starting calibration...");
+    for (uint16_t i = 0; i < appconfigSENSOR_CALIBRATION_PROBES; ++i) {
+        uint32_t sample; 
+        vMeasureDistance();
+        vTaskDelay( pdMS_TO_TICKS(100) );
+
+        sample = ulGetDistanceCm();
+        ESP_LOGI(TAG, "Registered sample: #%d: %lu", i, sample);
+        acc += sample;
+    }
+
+    T_APPS.ulCalibrationDistance = acc / appconfigSENSOR_CALIBRATION_PROBES; 
+    ESP_LOGI(TAG, "Device is properly calibrated with default distance of %lu cm.", 
+        T_APPS.ulCalibrationDistance);
+}
+
 void app_main( void ) {
     ESP_ERROR_CHECK( nvs_flash_init() );
     ESP_ERROR_CHECK( esp_netif_init() );
@@ -296,9 +326,10 @@ void app_main( void ) {
     /*Allow other core to finish initialization */
     vTaskDelay( pdMS_TO_TICKS( 100 ) );
 
+    sensor_calibrate();
     ( void ) example_connect();
-
     initialize_time();
+
    
     /* Main sensor handling function. */
     xTaskCreate(

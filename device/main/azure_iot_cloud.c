@@ -129,13 +129,6 @@ static AzureIoTHubClient_t xAzureIoTHubClient;
  */
 static uint8_t ucMQTTMessageBuffer[ appconfigNETWORK_BUFFER_SIZE ];
 
-/* 
- *  @brief Contains the current state of this IoT device.
- * */
-static struct {
-    bool bParkingLotIsFree;
-} tAppState = { .bParkingLotIsFree = true };
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -153,6 +146,11 @@ uint64_t ullGetUnixTime( void ) {
 
     return now;
 }
+
+/* 
+ *  @brief Contains the current state of this IoT device.
+ * */
+tAppState T_APPS = { UINT32_MAX, .bParkingLotIsFree = true };
 
 /*-----------------------------------------------------------*/
 
@@ -339,6 +337,10 @@ void prvAzureMainLoopTask( void * pvParameters ) {
 
     for( ; ; )
     {
+        // The lot is considered as free as long as the distance will be close to the calibrated value.
+        T_APPS.bParkingLotIsFree = 
+            ulGetDistanceCm() < T_APPS.ulCalibrationDistance - appconfigCALIBRATION_ERROR_MARGIN ? false : true;
+
         if( xAzureSample_IsConnectedToInternet() )
         {
             /* Attempt to establish TLS session with IoT Hub. If connection fails,
@@ -347,10 +349,11 @@ void prvAzureMainLoopTask( void * pvParameters ) {
              * value is reached. The function returns a failure status if the TCP
              * connection cannot be established to the IoT Hub after the configured
              * number of attempts. */
-            ulStatus = prvConnectToServerWithBackoffRetries( ( const char * ) pucIotHubHostname,
-                                                             appconfigIOTHUB_PORT,
-                                                             &xNetworkCredentials, &xNetworkContext );
-            configASSERT( ulStatus == 0 );
+            if (prvConnectToServerWithBackoffRetries( 
+                ( const char * ) pucIotHubHostname,
+                appconfigIOTHUB_PORT,
+                &xNetworkCredentials, 
+                &xNetworkContext )) continue;
 
             /* Fill in Transport Interface send and receive function pointers. */
             xTransport.pxNetworkContext = &xNetworkContext;
@@ -359,7 +362,7 @@ void prvAzureMainLoopTask( void * pvParameters ) {
 
             /* Init IoT Hub option */
             xResult = AzureIoTHubClient_OptionsInit( &xHubOptions );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) continue;
 
             xHubOptions.pucModuleID = ( const uint8_t * ) appconfigMODULE_ID;
             xHubOptions.ulModuleIDLength = sizeof( appconfigMODULE_ID ) - 1;
@@ -371,14 +374,14 @@ void prvAzureMainLoopTask( void * pvParameters ) {
                                               ucMQTTMessageBuffer, sizeof( ucMQTTMessageBuffer ),
                                               ullGetUnixTime,
                                               &xTransport );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) continue;
 
             #ifdef appconfigDEVICE_SYMMETRIC_KEY
                 xResult = AzureIoTHubClient_SetSymmetricKey( &xAzureIoTHubClient,
                                                              ( const uint8_t * ) appconfigDEVICE_SYMMETRIC_KEY,
                                                              sizeof( appconfigDEVICE_SYMMETRIC_KEY ) - 1,
                                                              Crypto_HMAC );
-                configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) continue;
             #endif /* appconfigDEVICE_SYMMETRIC_KEY */
 
             /* Sends an MQTT Connect packet over the already established TLS connection,
@@ -388,80 +391,80 @@ void prvAzureMainLoopTask( void * pvParameters ) {
             xResult = AzureIoTHubClient_Connect( &xAzureIoTHubClient,
                                                  false, &xSessionPresent,
                                                  CONNACK_RECV_TIMEOUT_MS );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) continue;
 
             xResult = AzureIoTHubClient_SubscribeCloudToDeviceMessage( &xAzureIoTHubClient, prvHandleCloudMessage,
                                                                        &xAzureIoTHubClient, SUBSCRIBE_TIMEOUT );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __disconnect;
 
             xResult = AzureIoTHubClient_SubscribeCommand( &xAzureIoTHubClient, prvHandleCommand,
                                                           &xAzureIoTHubClient, SUBSCRIBE_TIMEOUT );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_ctdm;
 
             xResult = AzureIoTHubClient_SubscribeProperties( &xAzureIoTHubClient, prvHandlePropertiesMessage,
                                                              &xAzureIoTHubClient, SUBSCRIBE_TIMEOUT );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_cmd;
 
             /* Get property document after initial connection */
             xResult = AzureIoTHubClient_RequestPropertiesAsync( &xAzureIoTHubClient );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
 
             /* Create a bag of properties for the telemetry */
             xResult = AzureIoTMessage_PropertiesInit( &xPropertyBag, ucPropertyBuffer, 0, sizeof( ucPropertyBuffer ) );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
 
             /* Sending a default property (Content-Type). */
             xResult = AzureIoTMessage_PropertiesAppend( &xPropertyBag,
                                                         ( uint8_t * ) AZ_IOT_MESSAGE_PROPERTIES_CONTENT_TYPE, sizeof( AZ_IOT_MESSAGE_PROPERTIES_CONTENT_TYPE ) - 1,
                                                         ( uint8_t * ) MESSAGE_CONTENT_TYPE, sizeof( MESSAGE_CONTENT_TYPE ) - 1 );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
 
             /* Sending a default property (Content-Encoding). */
             xResult = AzureIoTMessage_PropertiesAppend( &xPropertyBag,
                                                         ( uint8_t * ) AZ_IOT_MESSAGE_PROPERTIES_CONTENT_ENCODING, sizeof( AZ_IOT_MESSAGE_PROPERTIES_CONTENT_ENCODING ) - 1,
                                                         ( uint8_t * ) MESSAGE_CONTENT_ENCODING, sizeof( MESSAGE_CONTENT_ENCODING ) - 1 );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
             xResult = AzureIoTMessage_PropertiesAppend( 
                 &xPropertyBag, ( uint8_t * ) "status", sizeof( "status" ) - 1,
                 ( uint8_t * ) "online", sizeof( "online" ) - 1 );
-            configASSERT( xResult == eAzureIoTSuccess );
-
+            if(xResult) goto __unsub_prop;
 
             /* MQTT Publishing  */
-            if (tAppState.bParkingLotIsFree) {
+            if (T_APPS.bParkingLotIsFree) {
                 ulScratchBufferLength = snprintf(
                     (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
-                    "{ \"is_free\": true, \"vehicle_size\": \"%ld\" }", ulGetDistanceCm()
+                    "{ \"is_free\": true }"
                 );
             } else {
                 ulScratchBufferLength = snprintf(
                     (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
-                    "{ \"is_free\": false }"
+                    "{ \"is_free\": false, \"vehicle_size\": \"%ld\" }", 
+                    T_APPS.ulCalibrationDistance - ulGetDistanceCm()
                 );
             }
 
             xResult = AzureIoTHubClient_SendTelemetry(&xAzureIoTHubClient,
                                          ucScratchBuffer, ulScratchBufferLength,
                                          &xPropertyBag, eAzureIoTHubMessageQoS1, NULL);
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
 
             LogInfo( ( "Attempt to receive publish message from IoT Hub.\r\n" ) );
             xResult = AzureIoTHubClient_ProcessLoop( &xAzureIoTHubClient,
                                                          PROCESS_LOOP_TIMEOUT_MS );
-            configASSERT( xResult == eAzureIoTSuccess );
+            if(xResult) goto __unsub_prop;
             /* End MQTT Publishing.  */
 
-            if( xAzureSample_IsConnectedToInternet() )
-            {
+            if( xAzureSample_IsConnectedToInternet() ) {
+            __unsub_prop:
                 xResult = AzureIoTHubClient_UnsubscribeProperties( &xAzureIoTHubClient );
                 configASSERT( xResult == eAzureIoTSuccess );
-
+            __unsub_cmd:
                 xResult = AzureIoTHubClient_UnsubscribeCommand( &xAzureIoTHubClient );
                 configASSERT( xResult == eAzureIoTSuccess );
-
+            __unsub_ctdm:
                 xResult = AzureIoTHubClient_UnsubscribeCloudToDeviceMessage( &xAzureIoTHubClient );
                 configASSERT( xResult == eAzureIoTSuccess );
-
+            __disconnect:
                 /* Send an MQTT Disconnect packet over the already connected TLS over
                  * TCP connection. There is no corresponding response for the disconnect
                  * packet. After sending disconnect, client must close the network

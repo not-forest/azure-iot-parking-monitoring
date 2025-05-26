@@ -1,6 +1,25 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # SPDX-License-Identifier: MIT
 
+menu "Sensor Calibration Properties"
+
+    config SENSOR_CALIBRATION_PROBES
+        int "Sensor Calibration Probes Amount"
+        default 20
+        help
+            Amount of distance probes to provide during the application 
+            initialization phase. More probes will generate more accurate
+            calibration, yet requires more time to compute during startup.
+
+    config CALIBRATION_ERROR_MARGIN
+        int "Calibration Error Margin"
+        default 5
+        help
+            Error margin in cm. that allows values lesser than calibrated value
+            to still be considered as equal to the calibrated value itself.
+
+endmenu
+
 menu "Azure IoT middleware for FreeRTOS Sample Configuration"
 
     config SAMPLE_IOT_WIFI_SSID
