@@ -1,3 +1,133 @@
-h1{
-    color:aqua;
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+.car-park {
+  margin: 100px auto;
+  max-width: 600px;
+}
+
+.exit:before {
+  left: 0;
+}
+.exit:after {
+  right: 0;
+}
+
+.fuselage {
+  border-right: 5px solid #d8d8d8;
+  border-left: 5px solid #d8d8d8;
+}
+
+ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.parks {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.park {
+  display: flex;
+  flex: 0 0 21.3%;
+  padding: 10px;
+  position: relative;
+}
+.park:nth-child(2) {
+  margin-right: 14.28571428571429%;
+}
+.park input[type=checkbox] {
+  position: absolute;
+  opacity: 0;
+}
+.time-panel-button .time-panel {
+    background-color: #f0f0f0;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 20px;
+    width: 300px;
+    margin: 50px auto;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.time-panel-button .time-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #222;
+    text-align: center;
+}
+
+.time-panel-button .time-display {
+    font-size: 28px;
+    color: #007bff;
+    text-align: center;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.park input[type=checkbox]:disabled + label {
+  background: #dddddd;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+.park input[type=checkbox]:disabled + label:after {
+  content: "X";
+  text-indent: 0;
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+.park input[type=checkbox]:disabled + label:hover {
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.park label {
+  display: block;
+  position: relative;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.5rem;
+  padding: 4px 0;
+  background: #F42536;
+  border-radius: 5px;
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+.park label:before {
+  content: "";
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  top: 1px;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+}
+.park label:hover {
+  cursor: pointer;
+  box-shadow: 0 0 0px 2px #5C6AFF;
+}
+
+.timestamp {
+    display: none;
+    font-size: 14px;
+    color: #333;
+    margin-top: 5px;
 }
