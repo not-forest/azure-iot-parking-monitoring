@@ -2,7 +2,6 @@ package com.iot_parking_monitoring.receivers;
 
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.models.*;
-import com.iot_parking_monitoring.configurations.WebSocketHandler;
 import com.iot_parking_monitoring.controllers.WebSocketController;
 
 public class Receiver {

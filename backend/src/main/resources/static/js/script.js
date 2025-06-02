@@ -29,29 +29,29 @@ stompClient.connect({}, function(frame) {
 });
 const controllerData = {
 
-  "1B": true,
-  "1C": true,
-  "2A": true,
-  "2B": true,
-  "2C": true,
-  "2D": true,
+  "1B": false,
+  "1C": false,
+  "2A": false,
+  "2B": false,
+  "2C": false,
+  "2D": false,
+  "3A": false,
+  "3B": false,
+  "3C": false,
+  "3D": false,
+  "4A": false,
+  "4B": false,
+  "4C": false,
+  "4D": false,
+  "5A": false,
+  "5B": false,
+  "5C": false,
+  "5D": false,
+  "6A": false,
+  "6B": false,
+  "6C": false,
+  "6D": false,
 };
-
-function handleSpotClick(checkbox) {
-  const spotId = checkbox.id;
-  const label = document.querySelector(`label[for="${spotId}"]`);
-  const status = controllerData[spotId];
-
-  if (status === false) {
-    label.classList.add("free");
-    label.classList.remove("occupied");
-  } else {
-    label.classList.add("occupied");
-    label.classList.remove("free");
-  }
-
-  checkbox.checked = false;
-}
 
 function updateAllSpotColors() {
   for (const spotId in controllerData) {
