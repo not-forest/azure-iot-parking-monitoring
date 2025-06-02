@@ -1,3 +1,4 @@
+const socket = new WebSocket("/ws/event");
 document.addEventListener("DOMContentLoaded", function () {
   const date = new Date();
   const fullDate = `Dzisiaj: ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -7,14 +8,34 @@ document.addEventListener("DOMContentLoaded", function () {
     new bootstrap.Popover(label);
   });
 });
+socket.onmessage = (event) => {
+  try {
+    const data = JSON.parse(event.data);
+
+    const label = document.querySelector('label[for="1A"]');
+
+    if (label) {
+      if (data.is_true) {
+        label.classList.add("occupied");
+        label.classList.remove("free");
+      } else {
+        label.classList.add("free");
+        label.classList.remove("occupied");
+      }
+    }
+
+  } catch (error) {
+    console.error('Error parsing message:', error);
+  }
+};
 const controllerData = {
-  "1A": false,
+
   "1B": true,
-  "1C": false,
+  "1C": true,
   "2A": true,
-  "2B": false,
+  "2B": true,
   "2C": true,
-  "2D": false,
+  "2D": true,
 };
 
 function handleSpotClick(checkbox) {
