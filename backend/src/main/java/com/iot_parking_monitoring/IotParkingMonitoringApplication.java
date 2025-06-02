@@ -13,6 +13,7 @@ public class IotParkingMonitoringApplication {
 	private static WebSocketHandler webSocketHandler;
 
     public static void main(String[] args) {
+        webSocketHandler = new WebSocketHandler();
         Dotenv dotenv = Dotenv.load();
         String connectionString = dotenv.get("EVENT_HUB_CONNECTION_STRING");
         String eventHubName = dotenv.get("EVENT_HUB_NAME");
