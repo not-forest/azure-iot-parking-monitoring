@@ -28,3 +28,4 @@ device/build/*
 
 .vscode
 /backend/target/
+/backend/.env
