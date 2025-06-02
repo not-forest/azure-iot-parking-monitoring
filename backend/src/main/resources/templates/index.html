@@ -1,205 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
-    <title>Parking monitoring</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parking Monitoring</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="car-park">
-  <div class="exit exit--front fuselage">
-    
+  <div class="car-park">
+    <div class="exit exit--front fuselage"></div>
+    <ol class="cabin fuselage">
+
+      <li class="row row--1">
+        <ol class="parks" type="A">
+          <li class="park">
+            <input type="checkbox" id="1A" onclick="handleSpotClick(this)" />
+            <label for="1A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1A</label>
+            <div class="timestamp" id="timestamp-1A"></div>
+          </li>
+          <li class="park">
+            <input type="checkbox" id="1B" onclick="handleSpotClick(this)" />
+            <label for="1B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1B</label>
+            <div class="timestamp" id="timestamp-1B"></div>
+          </li>
+          <li class="park">
+            <input type="checkbox" id="1C" onclick="handleSpotClick(this)" />
+            <label for="1C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1C</label>
+            <div class="timestamp" id="timestamp-1C"></div>
+          </li>
+          <li class="park">
+            <input type="checkbox" disabled id="1D" />
+            <label for="1D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">Occupied</label>
+          </li>
+        </ol>
+      </li>
+      <li class="row row--2">
+        <ol class="parks" type="A">
+          <li class="park"><input type="checkbox" id="2A" /><label for="2A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">2A</label></li>
+          <li class="park"><input type="checkbox" id="2B" /><label for="2B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">2B</label></li>
+          <li class="park"><input type="checkbox" id="2C" /><label for="2C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">2C</label></li>
+          <li class="park"><input type="checkbox" id="2D" /><label for="2D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">2D</label></li>
+        </ol>
+      </li>
+      <li class="row row--3">
+        <ol class="parks" type="A">
+          <li class="park"><input type="checkbox" id="3A" /><label for="3A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">3A</label></li>
+          <li class="park"><input type="checkbox" id="3B" /><label for="3B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">3B</label></li>
+          <li class="park"><input type="checkbox" id="3C" /><label for="3C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">3C</label></li>
+          <li class="park"><input type="checkbox" id="3D" /><label for="3D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">3D</label></li>
+        </ol>
+      </li>
+      <li class="row row--4">
+        <ol class="parks" type="A">
+          <li class="park"><input type="checkbox" id="4A" /><label for="4A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">4A</label></li>
+          <li class="park"><input type="checkbox" id="4B" /><label for="4B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">4B</label></li>
+          <li class="park"><input type="checkbox" id="4C" /><label for="4C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">4C</label></li>
+          <li class="park"><input type="checkbox" id="4D" /><label for="4D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">4D</label></li>
+        </ol>
+      </li>
+      <li class="row row--5">
+        <ol class="parks" type="A">
+          <li class="park"><input type="checkbox" id="5A" /><label for="5A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">5A</label></li>
+          <li class="park"><input type="checkbox" id="5B" /><label for="5B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">5B</label></li>
+          <li class="park"><input type="checkbox" id="5C" /><label for="5C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">5C</label></li>
+          <li class="park"><input type="checkbox" id="5D" /><label for="5D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">5D</label></li>
+        </ol>
+      </li>
+      <li class="row row--6">
+        <ol class="parks" type="A">
+          <li class="park"><input type="checkbox" id="6A" /><label for="6A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">6A</label></li>
+          <li class="park"><input type="checkbox" id="6B" /><label for="6B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">6B</label></li>
+          <li class="park"><input type="checkbox" id="6C" /><label for="6C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">6C</label></li>
+          <li class="park"><input type="checkbox" id="6D" /><label for="6D" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">6D</label></li>
+        </ol>
+      </li>
+    </ol>
+    <div class="exit exit--back fuselage"></div>
   </div>
-  <ol class="cabin fuselage">
-    <li class="row row--1">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="1A" onclick="showTimestamp(this)" />
-          <label for="1A">1A</label>
-          <div class="timestamp" id="timestamp-1A"></div>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="1B" onclick="showTimestamp(this)" />
-          <label for="1B">1B</label>
-          <div class="timestamp" id="timestamp-1B"></div>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="1C" onclick="showTimestamp(this)" />
-          <label for="1C">1C</label>
-          <div class="timestamp" id="timestamp-1C"></div>
-        </li>
-        <li class="park">
-          <input type="checkbox" disabled id="1D" />
-          <label for="1D">Occupied</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--2">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="2A" />
-          <label for="2A">2A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="2B" />
-          <label for="2B">2B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="2C" />
-          <label for="2C">2C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="2D" />
-          <label for="2D">2D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--3">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="3A" />
-          <label for="3A">3A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="3B" />
-          <label for="3B">3B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="3C" />
-          <label for="3C">3C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="3D" />
-          <label for="3D">3D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--4">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="4A" />
-          <label for="4A">4A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="4B" />
-          <label for="4B">4B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="4C" />
-          <label for="4C">4C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="4D" />
-          <label for="4D">4D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--5">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="5A" />
-          <label for="5A">5A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="5B" />
-          <label for="5B">5B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="5C" />
-          <label for="5C">5C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="5D" />
-          <label for="5D">5D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--6">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="6A" />
-          <label for="6A">6A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="6B" />
-          <label for="6B">6B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="6C" />
-          <label for="6C">6C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="6D" />
-          <label for="6D">6D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--7">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="7A" />
-          <label for="7A">7A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="7B" />
-          <label for="7B">7B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="7C" />
-          <label for="7C">7C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="7D" />
-          <label for="7D">7D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--8">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="8A" />
-          <label for="8A">8A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="8B" />
-          <label for="8B">8B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="8C" />
-          <label for="8C">8C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="8D" />
-          <label for="8D">8D</label>
-        </li>
-      </ol>
-    </li>
-    <li class="row row--9">
-      <ol class="parks" type="A">
-        <li class="park">
-          <input type="checkbox" id="9A" />
-          <label for="9A">9A</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="9B" />
-          <label for="9B">9B</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="9C" />
-          <label for="9C">9C</label>
-        </li>
-        <li class="park">
-          <input type="checkbox" id="9D" />
-          <label for="9D">9D</label>
-        </li>
-      </ol>
-    </li>
-  </ol>
-  <div class="exit exit--back fuselage">
-    
-  </div>
-</div>
-</body>
-<script src="/js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/script.js"></script>
+  </body>
 </html>
