@@ -1,4 +1,4 @@
-package com.azure.iot_parking_monitoring.controllers;
+package com.iot_parking_monitoring.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
