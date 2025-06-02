@@ -3,17 +3,18 @@ package com.iot_parking_monitoring.receivers;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.models.*;
 import com.iot_parking_monitoring.configurations.WebSocketHandler;
+import com.iot_parking_monitoring.controllers.WebSocketController;
 
 public class Receiver {
 
     private final String connectionString;
     private final String eventHubName;
-    private final WebSocketHandler webSocketHandler;
+    private final WebSocketController webSocketController;
 
-    public Receiver(String connectionString, String eventHubName, WebSocketHandler webSocketHandler) {
+    public Receiver(String connectionString, String eventHubName, WebSocketController webSocketController) {
         this.connectionString = connectionString;
         this.eventHubName = eventHubName;
-        this.webSocketHandler = webSocketHandler;
+        this.webSocketController = webSocketController;
     }
 
     public void start() {
@@ -25,11 +26,13 @@ public class Receiver {
         consumer.getPartitionIds().subscribe(partitionId -> {
             consumer.receiveFromPartition(partitionId, EventPosition.latest())
                 .subscribe(partitionEvent -> {
-                    String body = partitionEvent.getData().getBodyAsString();
-                    System.out.printf("Received event from partition %s: %s%n",
-                        partitionId,
-                        partitionEvent.getData().getBodyAsString());
-                        webSocketHandler.sendMessageToAll(body);
+                    String eventBody = partitionEvent.getData().getBodyAsString();
+                    System.out.printf("Received event from partition %s: %s%n", partitionId, eventBody);
+                    try {
+                        webSocketController.sendMessageToClients(eventBody);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
         });
 

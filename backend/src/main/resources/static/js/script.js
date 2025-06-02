@@ -1,4 +1,6 @@
-const socket = new WebSocket("/ws/event");
+const socket = new SockJS('/ws');
+const stompClient = Stomp.over(socket);
+
 document.addEventListener("DOMContentLoaded", function () {
   const date = new Date();
   const fullDate = `Dzisiaj: ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -8,26 +10,23 @@ document.addEventListener("DOMContentLoaded", function () {
     new bootstrap.Popover(label);
   });
 });
-socket.onmessage = (event) => {
-  try {
-    const data = JSON.parse(event.data);
+stompClient.connect({}, function(frame) {
+    console.log('Connected: ' + frame);
 
-    const label = document.querySelector('label[for="1A"]');
-
-    if (label) {
-      if (data.is_true) {
-        label.classList.add("occupied");
-        label.classList.remove("free");
-      } else {
-        label.classList.add("free");
-        label.classList.remove("occupied");
-      }
-    }
-
-  } catch (error) {
-    console.error('Error parsing message:', error);
-  }
-};
+    stompClient.subscribe('/topic/parking', function(message) {
+        const data = JSON.parse(message.body);
+        const label = document.querySelector('label[for="1A"]');
+        if (label) {
+            if (data.is_free === false) {
+                label.classList.add("occupied");
+                label.classList.remove("free");
+            } else {
+                label.classList.add("free");
+                label.classList.remove("occupied");
+            }
+        }
+    });
+});
 const controllerData = {
 
   "1B": true,
