@@ -15,17 +15,17 @@
       <li class="row row--1">
         <ol class="parks" type="A">
           <li class="park">
-            <input type="checkbox" id="1A" onclick="handleSpotClick(this)" />
+            <input type="checkbox" id="1A" />
             <label for="1A" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1A</label>
             <div class="timestamp" id="timestamp-1A"></div>
           </li>
           <li class="park">
-            <input type="checkbox" id="1B" onclick="handleSpotClick(this)" />
+            <input type="checkbox" id="1B" />
             <label for="1B" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1B</label>
             <div class="timestamp" id="timestamp-1B"></div>
           </li>
           <li class="park">
-            <input type="checkbox" id="1C" onclick="handleSpotClick(this)" />
+            <input type="checkbox" id="1C" />
             <label for="1C" data-bs-toggle="popover" data-bs-placement="top" title="Parking Spot">1C</label>
             <div class="timestamp" id="timestamp-1C"></div>
           </li>
@@ -79,6 +79,8 @@
     <div class="exit exit--back fuselage"></div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
   <script src="/js/script.js"></script>
   </body>
 </html>
