@@ -1,9 +1,13 @@
 const socket = new SockJS('/ws');
 const stompClient = Stomp.over(socket);
+let arrivalTime = null;
+document.addEventListener("DOMContentLoaded", function () {
+  updateAllSpotColors();
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   const date = new Date();
-  const fullDate = `Dzisiaj: ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  const fullDate = `Today: ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
   document.querySelectorAll('[data-bs-toggle="popover"]').forEach(label => {
     label.setAttribute("data-bs-content", fullDate);
@@ -16,67 +20,60 @@ stompClient.connect({}, function(frame) {
     stompClient.subscribe('/topic/parking', function(message) {
         const data = JSON.parse(message.body);
         const label = document.querySelector('label[for="1A"]');
+
         if (label) {
-            if (data.is_free === false) {
+            const eventTime = new Date(data.time);
+
+            if (data.data.is_free === false) {
+                arrivalTime = eventTime;
+
+                const formattedArrival = eventTime.toLocaleString('uk-UA', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
                 label.classList.add("occupied");
                 label.classList.remove("free");
+                 if (data.data.is_state_changed === true){
+                label.setAttribute("data-bs-content", `Arrived: ${formattedArrival}`);
+                 }
             } else {
+                let durationText = "";
+
+                if (arrivalTime) {
+                    const ms = eventTime - arrivalTime;
+                    const totalSeconds = Math.floor(ms / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    durationText = `Parking time: ${hours}h ${minutes}m ${seconds}s`;
+                    arrivalTime = null;
+                }
+
                 label.classList.add("free");
                 label.classList.remove("occupied");
+                label.setAttribute("data-bs-content", `Free spot, \n${durationText}`);
             }
+
+            bootstrap.Popover.getInstance(label)?.dispose();
+            new bootstrap.Popover(label);
         }
     });
 });
-const controllerData = {
-
-  "1B": false,
-  "1C": false,
-  "2A": false,
-  "2B": false,
-  "2C": false,
-  "2D": false,
-  "3A": false,
-  "3B": false,
-  "3C": false,
-  "3D": false,
-  "4A": false,
-  "4B": false,
-  "4C": false,
-  "4D": false,
-  "5A": false,
-  "5B": false,
-  "5C": false,
-  "5D": false,
-  "6A": false,
-  "6B": false,
-  "6C": false,
-  "6D": false,
-};
 
 function updateAllSpotColors() {
-  for (const spotId in controllerData) {
-    const label = document.querySelector(`label[for="${spotId}"]`);
-    if (!label) continue;
+  const labels = document.querySelectorAll('label[for]');
 
-    const status = controllerData[spotId];
-    if (status === false) {
-      label.classList.add("free");
-      label.classList.remove("occupied");
-    } else {
-      label.classList.add("occupied");
-      label.classList.remove("free");
-    }
-  }
-}
+  labels.forEach(label => {
 
-document.addEventListener("DOMContentLoaded", function () {
-  const date = new Date();
-  const fullDate = `Dzisiaj: ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    if (label.getAttribute('for') === '1A') return;
 
-  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(label => {
-    label.setAttribute("data-bs-content", fullDate);
-    new bootstrap.Popover(label);
+    label.classList.add("free");
+    label.classList.remove("occupied");
   });
-
-  updateAllSpotColors();
-});
+}
