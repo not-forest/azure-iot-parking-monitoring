@@ -3,6 +3,9 @@ package com.iot_parking_monitoring.receivers;
 import java.time.Instant;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.models.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iot_parking_monitoring.controllers.WebSocketController;
 
 public class Receiver {
@@ -23,14 +26,20 @@ public class Receiver {
             .consumerGroup(EventHubClientBuilder.DEFAULT_CONSUMER_GROUP_NAME)
             .buildAsyncConsumerClient();
 
+        ObjectMapper mapper = new ObjectMapper();
+        
         consumer.getPartitionIds().subscribe(partitionId -> {
             consumer.receiveFromPartition(partitionId, EventPosition.latest())
                 .subscribe(partitionEvent -> {
                     String eventBody = partitionEvent.getData().getBodyAsString();
-                    Instant eventTime = partitionEvent.getData().getEnqueuedTime();
-                    System.out.printf("Received event from partition %s at %s: %s%n", partitionId, eventTime, eventBody);
+                    Instant enqueuedTime = partitionEvent.getData().getEnqueuedTime();
                     try {
-                        String messageWithTime = String.format("{\"time\": \"%s\", \"data\": %s}", eventTime, eventBody);
+                        ObjectNode json = mapper.createObjectNode();
+                        json.put("time", enqueuedTime.toString());
+                        JsonNode dataNode = mapper.readTree(eventBody);
+                        json.set("data", dataNode);
+                        String messageWithTime = mapper.writeValueAsString(json);
+                        System.out.printf("Received event from partition %s: %s%n", partitionId, messageWithTime);
                         webSocketController.sendMessageToClients(messageWithTime);
                     } catch (Exception e) {
                         e.printStackTrace();
