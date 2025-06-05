@@ -67,6 +67,7 @@ ol {
   box-shadow: none;
   cursor: not-allowed;
 }
+
 .park label {
   display: block;
   position: relative;
@@ -76,10 +77,9 @@ ol {
   font-weight: bold;
   line-height: 1.5rem;
   padding: 4px 0;
-  background: #F42536;
   border-radius: 5px;
-  animation-duration: 300ms;
-  animation-fill-mode: both;
+  background: #bada55;
+  transition: background 0.3s;
 }
 .park label:before {
   content: "";
@@ -98,20 +98,16 @@ ol {
 }
 
 .timestamp {
-    display: none;
-    font-size: 14px;
-    color: #333;
-    margin-top: 5px;
-}
-.park label {
-  background: #F42536;
-  transition: background 0.3s;
+  display: none;
+  font-size: 14px;
+  color: #333;
+  margin-top: 5px;
 }
 
 .park label.free {
-  background: #bada55;
+  background: #bada55 !important;
 }
 
 .park label.occupied {
-  background: #F42536;
+  background: #F42536 !important;
 }
