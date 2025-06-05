@@ -1,5 +1,6 @@
 package com.iot_parking_monitoring.receivers;
 
+import java.time.Instant;
 import com.azure.messaging.eventhubs.*;
 import com.azure.messaging.eventhubs.models.*;
 import com.iot_parking_monitoring.controllers.WebSocketController;
@@ -26,9 +27,11 @@ public class Receiver {
             consumer.receiveFromPartition(partitionId, EventPosition.latest())
                 .subscribe(partitionEvent -> {
                     String eventBody = partitionEvent.getData().getBodyAsString();
-                    System.out.printf("Received event from partition %s: %s%n", partitionId, eventBody);
+                    Instant eventTime = partitionEvent.getData().getEnqueuedTime();
+                    System.out.printf("Received event from partition %s at %s: %s%n", partitionId, eventTime, eventBody);
                     try {
-                        webSocketController.sendMessageToClients(eventBody);
+                        String messageWithTime = String.format("{\"time\": \"%s\", \"data\": %s}", eventTime, eventBody);
+                        webSocketController.sendMessageToClients(messageWithTime);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
