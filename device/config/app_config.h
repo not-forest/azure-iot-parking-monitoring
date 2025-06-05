@@ -44,7 +44,8 @@
  * */
 typedef struct {
     uint32_t ulCalibrationDistance;
-    bool bParkingLotIsFree;
+    char sParkingLotNumber[2];
+    bool bParkingLotIsFree, bIsStateChanged;
 } tAppState;
 
 /**
