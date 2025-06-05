@@ -115,6 +115,8 @@
 #define SUBSCRIBE_TIMEOUT                       ( 10000U )
 /*-----------------------------------------------------------*/
 
+#define BTOSTR(b) b ? "true" : "false"
+
 static uint8_t ucPropertyBuffer[ 80 ];
 static uint8_t ucScratchBuffer[ 128 ];
 struct NetworkContext
@@ -150,7 +152,12 @@ uint64_t ullGetUnixTime( void ) {
 /* 
  *  @brief Contains the current state of this IoT device.
  * */
-tAppState T_APPS = { UINT32_MAX, .bParkingLotIsFree = true };
+tAppState T_APPS = { 
+    .ulCalibrationDistance = UINT32_MAX, 
+    .bParkingLotIsFree = true,
+    .bIsStateChanged = false,
+    .sParkingLotNumber = "A1",
+};
 
 /*-----------------------------------------------------------*/
 
@@ -337,9 +344,13 @@ void prvAzureMainLoopTask( void * pvParameters ) {
 
     for( ; ; )
     {
+        bool prev_state = T_APPS.bParkingLotIsFree;
         // The lot is considered as free as long as the distance will be close to the calibrated value.
         T_APPS.bParkingLotIsFree = 
             ulGetDistanceCm() < T_APPS.ulCalibrationDistance - appconfigCALIBRATION_ERROR_MARGIN ? false : true;
+
+        // State is changed only when bools do not match.
+        T_APPS.bIsStateChanged = T_APPS.bParkingLotIsFree != prev_state;
 
         if( xAzureSample_IsConnectedToInternet() )
         {
@@ -433,12 +444,14 @@ void prvAzureMainLoopTask( void * pvParameters ) {
             if (T_APPS.bParkingLotIsFree) {
                 ulScratchBufferLength = snprintf(
                     (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
-                    "{ \"is_free\": true }"
+                    "{ \"is_free\": true, \"is_state_changed\": %s }",
+                    BTOSTR(T_APPS.bIsStateChanged)
                 );
             } else {
                 ulScratchBufferLength = snprintf(
                     (char *)ucScratchBuffer, sizeof(ucScratchBuffer),
-                    "{ \"is_free\": false, \"vehicle_size\": \"%ld\" }", 
+                    "{ \"is_free\": false, \"is_state_changed\": %s, \"vehicle_size\": \"%ld\" }", 
+                    BTOSTR(T_APPS.bIsStateChanged),
                     T_APPS.ulCalibrationDistance - ulGetDistanceCm()
                 );
             }
