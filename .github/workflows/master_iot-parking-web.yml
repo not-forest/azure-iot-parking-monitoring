@@ -26,7 +26,10 @@ jobs:
         working-directory: ./backend
 
       - name: Copy JAR to root for deployment
-        run: cp ./backend/target/*.jar ${{ github.workspace }}/
+        run: cp ./backend/target/*.jar ./
+
+      - name: List files in root to confirm JAR presence
+        run: ls -l
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -49,6 +52,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
+
+      - name: List files after artifact download
+        run: ls -l
 
       - name: Login to Azure
         uses: azure/login@v2
