@@ -25,11 +25,14 @@ jobs:
         run: mvn clean install
         working-directory: ./backend
 
+      - name: Copy JAR to root for deployment
+        run: cp ./backend/target/*.jar ${{ github.workspace }}/
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: ./backend/target/*.jar
+          path: '*.jar'
 
   deploy:
     runs-on: ubuntu-latest
