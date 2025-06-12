@@ -111,3 +111,14 @@ ol {
 .park label.occupied {
   background: #F42536 !important;
 }
+
+.parkingtime {
+  text-align: center;
+  color: #6c757d; /* Bootstrap-сірий */
+  margin-top: 20px;
+}
+
+.parkingtime h1,
+.parkingtime h3 {
+  margin: 0.5em 0;
+}
